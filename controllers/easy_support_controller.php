@@ -1,4 +1,5 @@
 <?php
+App::import('Core', 'Sanitize');
 /**
  * EasySupportController
  *
@@ -15,7 +16,7 @@ class EasySupportController extends EasySupportAppController
      * @var array
      */
     var $uses = array(
-        'EasySupport',
+        'EasySupport.EasySupport',
     );
 
     /**
@@ -25,9 +26,7 @@ class EasySupportController extends EasySupportAppController
      * @var array
      */
     var $components = array(
-        'Ajax',
         'Session',
-        'Sanitization',
     );
 
     /**
@@ -62,7 +61,7 @@ class EasySupportController extends EasySupportAppController
      */
     function _sanitize()
     {
-        $Controller->data = Sanitize::clean($Controller->data, array('escape' => false));
+        $this->data = Sanitize::clean($this->data, array('escape' => false));
     }
 
     /**
@@ -73,7 +72,8 @@ class EasySupportController extends EasySupportAppController
     function beforeFilter()
     {
         $this->_sanitize();
-        if ($this->_AjaxAction()) {
+        if ($this->_isAjaxAction()) {
+            $this->autoRender = false;
             if (!$this->RequestHandler->{$checkMethod}()) {
                 if (Configure::read('debug') == 0) {
                     $this->cakeError('error404');
@@ -82,6 +82,19 @@ class EasySupportController extends EasySupportAppController
             }
         }
         parent::beforeFilter();
+    }
+
+    /**
+     * afterFilter callback.
+     *
+     * @access public
+     */
+    function afterFilter()
+    {
+        if ($this->_isAjaxAction()) {
+            $Controller->render('ajax');
+        }
+        parent::afterFilter();
     }
 
     /**

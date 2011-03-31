@@ -27,6 +27,7 @@ class EasySupportController extends EasySupportAppController
      */
     var $components = array(
         'Session',
+        'RequestHandler',
     );
 
     /**
@@ -74,7 +75,7 @@ class EasySupportController extends EasySupportAppController
         $this->_sanitize();
         if ($this->_isAjaxAction()) {
             $this->autoRender = false;
-            if (!$this->RequestHandler->{$checkMethod}()) {
+            if (!$this->RequestHandler->isAjax()) {
                 if (Configure::read('debug') == 0) {
                     $this->cakeError('error404');
                 }
@@ -92,7 +93,7 @@ class EasySupportController extends EasySupportAppController
     function afterFilter()
     {
         if ($this->_isAjaxAction()) {
-            $Controller->render('ajax');
+            $this->render('ajax');
         }
         parent::afterFilter();
     }
@@ -113,9 +114,9 @@ class EasySupportController extends EasySupportAppController
      */
     function send()
     {
-        $return = $this->Support->send($this->data);
-        if (is_numeric($this->Support->id)) {
-            $return &= $this->Session->write('Support.id', $this->Support->id);
+        $return = $this->EasySupport->send($this->data);
+        if (is_numeric($this->EasySupport->id)) {
+            $return &= $this->Session->write('Support.id', $this->EasySupport->id);
         }
         $this->set('data', $return);
     }
@@ -130,7 +131,7 @@ class EasySupportController extends EasySupportAppController
         $data = false;
         if ($this->Session->check('Support.id')) {
             $id = $this->Session->read('Support.id');
-            $data = $this->Support->cancel($id);
+            $data = $this->EasySupport->cancel($id);
             $this->Session->delete('Support.id');
         }
         $this->set('data', $data);

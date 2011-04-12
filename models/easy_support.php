@@ -131,6 +131,35 @@ class EasySupport extends EasySupportAppModel
     );
 
     /**
+     * Constructor
+     *
+     * @access private
+     * @param mixed $id
+     * @param string $table
+     * @param string $ds
+     */
+    function __construct($id = false, $table = null, $ds = null)
+    {
+        $dir = CACHE . 'easy_support';
+        if (!file_exists($dir) || is_file($dir)) {
+            mkdir($dir);
+        }
+        Cache::config(
+            'EasySupport',
+            array(
+                'engine' => 'File',
+                'duration'=> 3600,
+                'probability'=> 100,
+                'path' => $dir,
+                'prefix' => 'es_',
+                'lock' => false,
+                'serialize' => true,
+            )
+        );
+        return parent::__construct($id, $table, $ds);
+    }
+
+    /**
      * Send messages.
      *
      * @access public
@@ -139,6 +168,13 @@ class EasySupport extends EasySupportAppModel
      */
     function send($data)
     {
+        $ip = $_SERVER['REMOTE_ADDR'];
+        if ($sec = Cache::read($ip, 'EasySupport')) {
+            if (microtime(true) - $sec < Configure::read('EasySupport.repeated')) {
+                return false;
+            }
+        }
+        Cache::write($ip, microtime(true), 'EasySupport');
         $this->create();
         $this->set($data);
         return $this->save($data);

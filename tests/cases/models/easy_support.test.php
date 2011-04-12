@@ -15,6 +15,9 @@ class EasySupportTestCase extends CakeTestCase
     {
         unset($this->EasySupport);
         ClassRegistry::flush();
+
+        Configure::write('Cache.disable', true);
+        Configure::write('Cache.check', false);
     }
 
     function testSaveIfTypeIsPage()
@@ -81,6 +84,32 @@ class EasySupportTestCase extends CakeTestCase
         );
         $ret = $this->EasySupport->send($data);
         $this->assertTrue($ret);
+    }
+
+    function testSendAttack()
+    {
+        Configure::write('Cache.disable', false);
+        Configure::write('Cache.check', true);
+        Configure::write('EasySupport.repeated', 0.5);
+        $old = $this->EasySupport->find('count');
+
+        $data = array(
+            'type' => 'box',
+            'content' => 'new content',
+        );
+        $ret = $this->EasySupport->send($data);
+        $this->assertTrue($ret);
+
+        for ($i = 0; $i < 10; $i ++) {
+            $data = array(
+                'type' => 'box',
+                'content' => 'new content',
+            );
+            $ret = $this->EasySupport->send($data);
+            $this->assertFalse($ret);
+        }
+
+        $this->assertEqual($old + 1, $this->EasySupport->find('count'));
     }
 
     function testGetEmails()

@@ -80,7 +80,7 @@ class EasySupportShell extends EmailShell
         $alias = $this->EasySupport->alias;
         foreach ($supports as $support) {
             extract($support[$this->EasySupport->alias]);
-            if ($this->_send(String::insert($this->subject[$type], compact($title)), $content)) {
+            if ($this->_send(String::insert($this->subjects[$type], compact($title)), $content)) {
                 $this->EasySupport->updateSent($id);
             }
         }

@@ -36,7 +36,7 @@ class EasySupportShell extends EmailShell
      */
     var $subjects = array(
         'box' => 'お問い合わせボックスから送信',
-        'form' => 'お問い合わせフォームから送信 - :title',
+        'page' => 'お問い合わせフォームから送信 - :title',
     );
 
     /**

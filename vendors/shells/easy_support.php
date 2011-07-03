@@ -56,10 +56,13 @@ class EasySupportShell extends EmailShell
      * @param string $content
      * @return boolean
      */
-    function _send($subject, $content)
+    function _send($subject, $content, $mail = null)
     {
         $this->ExEmail->reset();
         $this->ExEmail->subject = $subject;
+        if ($mail) {
+            $this->ExEmail->from = $mail;
+        }
         if (!$return = $this->ExEmail->send($content)) {
             $this->error('Could not send the support mail.');
         }
@@ -80,7 +83,7 @@ class EasySupportShell extends EmailShell
         $alias = $this->EasySupport->alias;
         foreach ($supports as $support) {
             extract($support[$this->EasySupport->alias]);
-            if ($this->_send(String::insert($this->subjects[$type], compact('title')), $content)) {
+            if ($this->_send(String::insert($this->subjects[$type], compact('title')), $content, $mail)) {
                 $this->EasySupport->updateSent($id);
             }
         }
